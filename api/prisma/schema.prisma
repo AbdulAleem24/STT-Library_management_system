@@ -1,0 +1,185 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  categorycode       String     @id @map("categorycode")
+  description        String
+  category_type      String     @default("A")
+  max_checkout_count Int        @default(5)
+  loan_period_days   Int        @default(14)
+  created_at         DateTime   @default(now())
+  borrowers          Borrower[]
+
+  @@map("categories")
+}
+
+model ItemType {
+  itemtype           String   @id @map("itemtype")
+  description        String
+  rentalcharge       Decimal  @default(0) @db.Decimal(10, 2)
+  defaultreplacecost Decimal  @default(0) @db.Decimal(10, 2)
+  notforloan         Boolean  @default(false)
+  created_at         DateTime @default(now())
+  biblios            Biblio[]
+
+  @@map("itemtypes")
+}
+
+model Biblio {
+  biblionumber    Int       @id @default(autoincrement())
+  title           String
+  subtitle        String?
+  author          String?
+  isbn            String?   @unique(map: "idx_biblio_isbn")
+  publisher       String?
+  publicationyear Int?
+  itemtype        String?
+  notes           String?
+  abstract        String?
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @default(now())
+  itemType        ItemType? @relation(fields: [itemtype], references: [itemtype])
+  items           Item[]
+  reserves        Reserve[]
+
+  @@map("biblio")
+}
+
+model Item {
+  itemnumber       Int           @id @default(autoincrement())
+  biblionumber     Int
+  barcode          String        @unique
+  itemcallnumber   String?
+  location         String?
+  price            Decimal?      @db.Decimal(10, 2)
+  replacementprice Decimal?      @db.Decimal(10, 2)
+  status           String        @default("available")
+  status_date      DateTime?
+  notforloan       Boolean       @default(false)
+  issues           Int           @default(0)
+  renewals         Int           @default(0)
+  reserves_count   Int           @default(0) @map("reserves")
+  onloan           DateTime?
+  datelastborrowed DateTime?
+  datelastseen     DateTime      @default(now())
+  notes            String?
+  created_at       DateTime      @default(now())
+  updated_at       DateTime      @default(now())
+  accountLines     AccountLine[]
+  issuesRecords    Issue?        @relation("ItemIssues")
+  biblio           Biblio        @relation(fields: [biblionumber], references: [biblionumber], onDelete: Cascade)
+  reservesRecords  Reserve[]
+
+  @@map("items")
+}
+
+model Borrower {
+  borrowernumber      Int           @id @default(autoincrement())
+  cardnumber          String        @unique
+  full_name           String
+  preferred_name      String?
+  dateofbirth         DateTime?     @db.Date
+  email               String?       @unique(map: "idx_borrowers_email")
+  phone               String?
+  address             Json?
+  categorycode        String
+  dateenrolled        DateTime?     @db.Date
+  dateexpiry          DateTime?     @db.Date
+  debarred            DateTime?     @db.Date
+  debarred_comment    String?
+  userid              String?       @unique(map: "idx_borrowers_userid")
+  password            String
+  staff_notes         String?
+  lastseen            DateTime?
+  created_at          DateTime      @default(now())
+  updated_at          DateTime      @default(now())
+  role                Role          @default(MEMBER)
+  accountLines        AccountLine[] @relation("BorrowerAccountLines")
+  managedAccountLines AccountLine[] @relation("ManagerAccountLines")
+  category            Category      @relation(fields: [categorycode], references: [categorycode])
+  issuesRecords       Issue[]       @relation("BorrowerIssues")
+  reservesRecords     Reserve[]
+
+  @@map("borrowers")
+}
+
+model Issue {
+  issue_id        Int           @id @default(autoincrement())
+  borrowernumber  Int
+  itemnumber      Int           @unique
+  issuedate       DateTime      @default(now())
+  date_due        DateTime
+  returndate      DateTime?
+  lastreneweddate DateTime?
+  renewals_count  Int           @default(0)
+  created_at      DateTime      @default(now())
+  fines           AccountLine[]
+  borrower        Borrower      @relation("BorrowerIssues", fields: [borrowernumber], references: [borrowernumber])
+  item            Item          @relation("ItemIssues", fields: [itemnumber], references: [itemnumber])
+
+  @@map("issues")
+}
+
+model Reserve {
+  reserve_id       Int       @id @default(autoincrement())
+  borrowernumber   Int
+  biblionumber     Int
+  itemnumber       Int?
+  reservedate      DateTime  @default(now()) @db.Date
+  expirationdate   DateTime? @db.Date
+  cancellationdate DateTime? @db.Date
+  waitingdate      DateTime? @db.Date
+  priority         Int       @default(1)
+  found            String?   @db.VarChar(1)
+  notes            String?
+  created_at       DateTime  @default(now())
+  biblio           Biblio    @relation(fields: [biblionumber], references: [biblionumber], onDelete: Cascade)
+  borrower         Borrower  @relation(fields: [borrowernumber], references: [borrowernumber], onDelete: Cascade)
+  item             Item?     @relation(fields: [itemnumber], references: [itemnumber], onDelete: Cascade)
+
+  @@map("reserves")
+}
+
+model AccountLine {
+  accountlines_id   Int       @id @default(autoincrement())
+  borrowernumber    Int?
+  itemnumber        Int?
+  issue_id          Int?
+  date              DateTime  @default(now())
+  amount            Decimal   @default(0) @db.Decimal(10, 2)
+  amountoutstanding Decimal   @default(0) @db.Decimal(10, 2)
+  description       String?
+  accounttype       String?
+  payment_type      String?
+  status            String?
+  manager_id        Int?
+  note              String?
+  created_at        DateTime  @default(now())
+  borrower          Borrower? @relation("BorrowerAccountLines", fields: [borrowernumber], references: [borrowernumber])
+  issue             Issue?    @relation(fields: [issue_id], references: [issue_id])
+  item              Item?     @relation(fields: [itemnumber], references: [itemnumber])
+  manager           Borrower? @relation("ManagerAccountLines", fields: [manager_id], references: [borrowernumber])
+
+  @@map("accountlines")
+}
+
+model SystemPreference {
+  variable    String   @id
+  value       String?
+  explanation String?
+  type        String?
+  updated_at  DateTime @default(now())
+
+  @@map("systempreferences")
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
