@@ -5,9 +5,11 @@ This folder contains comprehensive documentation for the Library Management Syst
 ## Folder Structure
 
 ### `/DEVELOPMENT`
+
 Development and testing documentation for contributors and reviewers.
 
-**Key Files:**
+#### Key Files:
+
 - `HOW_TO_RUN.md` - Setup and running instructions
 - `ARCHITECTURE_OVERVIEW.md` - System architecture and design patterns
 - `API_ENDPOINTS_TESTING_CHECKLIST.md` - API endpoint testing status
@@ -23,9 +25,11 @@ Development and testing documentation for contributors and reviewers.
 - `PROJECT_ASSESSMENT_REPORT.md` - Project evaluation report
 
 ### `/LEARNING`
+
 Educational resources for understanding the project (especially for beginners).
 
-**Key Files:**
+#### Key Files:
+
 - `00-Introduction-For-Beginners.md` - Getting started guide
 - `01-Database-Schema-Explained.md` - Database design walkthrough
 - `02-Authentication-Security-Explained.md` - Auth & security concepts
@@ -36,9 +40,11 @@ Educational resources for understanding the project (especially for beginners).
 - `PRESENTATION_GUIDE.md` - Project presentation tips
 
 ### `/SCHEMA_OVERVIEW`
+
 Database schema documentation and design decisions.
 
-**Key Files:**
+#### Key Files:
+
 - `01-System-Overview.md` - High-level system design
 - `02-Tables-Detailed.md` - Database table specifications
 - `03-Database-Normalization-4NF.md` - Normalization documentation
@@ -57,27 +63,32 @@ Database schema documentation and design decisions.
 
 ## Quick Links
 
-### For First-Time Setup
+#### For First-Time Setup
+
 1. Read `/LEARNING/00-Introduction-For-Beginners.md`
 2. Follow `/DEVELOPMENT/HOW_TO_RUN.md`
 3. Review `/SCHEMA_OVERVIEW/01-System-Overview.md`
 
-### For Development
+#### For Development
+
 1. Check `/DEVELOPMENT/ARCHITECTURE_OVERVIEW.md`
 2. Review `/DEVELOPMENT/BUSINESS_LOGIC_TESTING_GUIDE.md`
 3. Use `/DEVELOPMENT/API_ENDPOINTS_TESTING_CHECKLIST.md`
 
-### For Testing
+#### For Testing
+
 1. Start with `/DEVELOPMENT/TESTING_DOCUMENTATION_INDEX.md`
 2. Follow `/DEVELOPMENT/MANUAL_TESTING_GUIDE.md`
 3. Check `/DEVELOPMENT/TESTING_STATUS_CHECKLIST.md`
 
-### For Submission
+#### For Submission
+
 1. Complete `/DEVELOPMENT/SUBMISSION_CHECKLIST.md`
 2. Review `/LEARNING/06-Submission-Guide.md`
 3. Prepare using `/LEARNING/PRESENTATION_GUIDE.md`
 
-### For Understanding Database
+#### For Understanding Database
+
 1. Read `/SCHEMA_OVERVIEW/02-Tables-Detailed.md`
 2. Study `/SCHEMA_OVERVIEW/03-Database-Normalization-4NF.md`
 3. Review `/SCHEMA_OVERVIEW/10-Data-Flow-Examples.md`
@@ -85,6 +96,7 @@ Database schema documentation and design decisions.
 ## Documentation Purpose
 
 This documentation suite provides:
+
 - **Learning Resources** - For beginners and new contributors
 - **Technical Specs** - Detailed implementation documentation
 - **Testing Guides** - Comprehensive testing strategies
