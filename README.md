@@ -59,47 +59,47 @@ Interactive Swagger documentation: `http://localhost:4000/docs`
 
 ### Core Endpoints
 
-**Borrowers** (Members)
+#### Borrowers (Members)
 - `GET /api/borrowers` - List all borrowers (Admin)
 - `GET /api/borrowers/:id` - Get borrower details
 - `POST /api/borrowers` - Create borrower (Admin)
 - `PUT /api/borrowers/:id` - Update borrower
 - `DELETE /api/borrowers/:id` - Delete borrower (Admin)
 
-**Biblio** (Catalog)
+#### Biblio (Catalog)
 - `GET /api/biblio` - Search catalog (pagination, filters)
 - `GET /api/biblio/:id` - Get biblio details
 - `POST /api/biblio` - Create biblio record (Admin)
 - `PUT /api/biblio/:id` - Update biblio (Admin)
 - `DELETE /api/biblio/:id` - Delete biblio (Admin)
 
-**Items** (Physical copies)
+#### Items (Physical copies)
 - `GET /api/items` - List items
 - `GET /api/items/:id` - Get item details
 - `POST /api/items` - Add item (Admin)
 - `PUT /api/items/:id` - Update item (Admin)
 - `DELETE /api/items/:id` - Delete item (Admin)
 
-**Circulation** (Checkout/Return)
+#### Circulation (Checkout/Return)
 - `POST /api/circulation/checkout` - Checkout item
 - `POST /api/circulation/return` - Return item
 - `POST /api/circulation/renew` - Renew checkout
 - `GET /api/circulation/history` - Checkout history (Admin)
 
-**Reserves** (Holds)
+#### Reserves (Holds)
 - `GET /api/reserves` - List reserves
 - `GET /api/reserves/:id` - Get reserve details
 - `POST /api/reserves` - Place hold on item
 - `PUT /api/reserves/:id` - Update reserve
 - `DELETE /api/reserves/:id` - Cancel reserve
 
-**Accounts** (Fines)
+#### Accounts (Fines)
 - `GET /api/accounts` - List account lines
 - `GET /api/accounts/:id` - Get account details
 - `POST /api/accounts/:id/pay` - Pay fine
 - `PUT /api/accounts/:id/waive` - Waive fine (Admin)
 
-**System Preferences**
+#### System Preferences
 - `GET /api/system-preferences` - List settings (Admin)
 - `PUT /api/system-preferences/:variable` - Update setting (Admin)
 
