@@ -2,6 +2,8 @@ import prisma from '../prisma.js';
 import { ApiError } from '../utils/apiError.js';
 import { buildPagination, buildMeta } from '../utils/pagination.js';
 
+const MAX_ACTIVE_HOLDS = 5;
+
 export const listReserves = async ({ page = 1, limit = 20, borrower }) => {
   const { skip } = buildPagination({ page, limit });
 
@@ -49,6 +51,33 @@ export const createReserve = async ({ borrowernumber, biblionumber, itemnumber }
       if (!item) {
         throw new ApiError(404, 'Item not found');
       }
+      if (!item.notforloan && item.status === 'available') {
+        throw new ApiError(403, 'Cannot place a hold on an available item');
+      }
+    } else {
+      const availableItem = await tx.item.findFirst({
+        where: {
+          biblionumber,
+          status: 'available',
+          notforloan: false
+        }
+      });
+
+      if (availableItem) {
+        throw new ApiError(403, 'Title currently has available copies');
+      }
+    }
+
+    const activeHoldCount = await tx.reserve.count({
+      where: {
+        borrowernumber,
+        cancellationdate: null,
+        found: null
+      }
+    });
+
+    if (activeHoldCount >= MAX_ACTIVE_HOLDS) {
+      throw new ApiError(403, `Borrower already has ${MAX_ACTIVE_HOLDS} active holds`);
     }
 
     const existing = await tx.reserve.findFirst({

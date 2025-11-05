@@ -14,6 +14,7 @@ export const updateBorrowerValidator = [
   body('fullName').optional().isString().trim().notEmpty(),
   body('preferredName').optional().isString().trim(),
   body('email').optional().isEmail().withMessage('Email must be valid').normalizeEmail(),
+  body('cardnumber').optional().isString().isLength({ min: 3 }).withMessage('Card number must be at least 3 characters'),
   body('phone').optional().isString(),
   body('dateexpiry').optional().isISO8601().toDate(),
   body('debarred').optional().isISO8601().toDate(),

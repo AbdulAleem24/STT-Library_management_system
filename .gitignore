@@ -7,6 +7,7 @@ package-lock.json
 .env.local
 .env.*.local
 .env.test
+api/tests/setup/jest.setup.js
 
 # Keep .env.example and .env.test.example (safe templates)
 !.env.example

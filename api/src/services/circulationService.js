@@ -44,6 +44,25 @@ export const checkoutItem = async ({ borrowernumber, itemnumber, barcode }, acto
       throw new ApiError(403, 'Membership expired');
     }
 
+    const maxFineRaw = await getSystemPreference(tx, 'max_fine_allowed', '5.00');
+    const maxFine = Number(maxFineRaw);
+    if (!Number.isNaN(maxFine) && maxFine > 0) {
+      const outstandingAgg = await tx.accountLine.aggregate({
+        where: {
+          borrowernumber,
+          status: {
+            in: ['open', 'partially_paid']
+          }
+        },
+        _sum: { amountoutstanding: true }
+      });
+
+      const outstanding = Number(outstandingAgg._sum.amountoutstanding ?? 0);
+      if (outstanding >= maxFine) {
+        throw new ApiError(403, 'Borrower has outstanding fines exceeding limit');
+      }
+    }
+
     const item = await getItemByIdentifier(tx, { itemnumber, barcode });
     if (!item) {
       throw new ApiError(404, 'Item not found');

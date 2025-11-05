@@ -15,7 +15,7 @@ export const registerUser = async ({
   email,
   password,
   categorycode = 'ADULT',
-  role = 'MEMBER'
+  role
 }) => {
   const existingCard = await prisma.borrower.findUnique({ where: { cardnumber } });
   if (existingCard) {
@@ -34,6 +34,12 @@ export const registerUser = async ({
     throw new ApiError(422, `Category ${categorycode} does not exist.`);
   }
 
+  if (role && role !== 'MEMBER') {
+    throw new ApiError(403, 'New registrations cannot assign administrative roles');
+  }
+
+  const assignedRole = 'MEMBER';
+
   const hashed = await bcrypt.hash(password, config.bcryptSaltRounds);
 
   const borrower = await prisma.borrower.create({
@@ -43,7 +49,7 @@ export const registerUser = async ({
       email,
       password: hashed,
       categorycode,
-      role
+      role: assignedRole
     }
   });
 

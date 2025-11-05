@@ -14,6 +14,7 @@ describe('Reserve API', () => {
   let adminToken;
   let memberToken;
   let member;
+  let holder;
   let biblio;
   let item;
 
@@ -22,8 +23,17 @@ describe('Reserve API', () => {
     await seedBaseData();
     ({ token: adminToken } = await createAdminWithToken());
     ({ borrower: member, token: memberToken } = await createMemberWithToken());
+    ({ borrower: holder } = await createMemberWithToken({
+      cardnumber: 'RES-HOLDER',
+      email: 'reserve.holder@example.com'
+    }));
     biblio = await createBiblioRecord({ title: 'Reserve Book' });
     item = await createItemRecord({ biblionumber: biblio.biblionumber, barcode: 'RES-001' });
+
+    await request(app)
+      .post('/api/circulation/checkout')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ borrowernumber: holder.borrowernumber, barcode: 'RES-001' });
   });
 
   it('allows members to place holds for themselves', async () => {

@@ -19,7 +19,10 @@ export const listBorrowers = async ({ page = 1, limit = 20, search, sort = 'crea
       }
     : undefined;
 
-  const [field = 'created_at', direction = 'desc'] = sort.split(':');
+  const allowedSortFields = new Set(['created_at', 'full_name', 'email', 'cardnumber']);
+  const [rawField = 'created_at', rawDirection = 'desc'] = sort.split(':');
+  const field = allowedSortFields.has(rawField) ? rawField : 'created_at';
+  const direction = rawDirection?.toLowerCase() === 'asc' ? 'asc' : 'desc';
 
   const [total, borrowers] = await Promise.all([
     prisma.borrower.count({ where }),
@@ -27,7 +30,7 @@ export const listBorrowers = async ({ page = 1, limit = 20, search, sort = 'crea
       where,
       skip,
       take: Number(limit),
-      orderBy: { [field]: direction.toLowerCase() === 'asc' ? 'asc' : 'desc' },
+      orderBy: { [field]: direction },
       include: { category: true }
     })
   ]);
@@ -98,6 +101,20 @@ export const updateBorrower = async (id, payload) => {
     throw new ApiError(404, 'Borrower not found');
   }
 
+  if (payload.email && payload.email !== borrower.email) {
+    const emailExists = await prisma.borrower.findUnique({ where: { email: payload.email } });
+    if (emailExists && emailExists.borrowernumber !== id) {
+      throw new ApiError(409, 'Email already registered');
+    }
+  }
+
+  if (payload.cardnumber && payload.cardnumber !== borrower.cardnumber) {
+    const cardExists = await prisma.borrower.findUnique({ where: { cardnumber: payload.cardnumber } });
+    if (cardExists && cardExists.borrowernumber !== id) {
+      throw new ApiError(409, 'Card number already exists');
+    }
+  }
+
   const data = {};
   if (payload.fullName) data.full_name = payload.fullName;
   if (payload.preferredName !== undefined) data.preferred_name = payload.preferredName;
@@ -107,6 +124,7 @@ export const updateBorrower = async (id, payload) => {
   if (payload.dateexpiry) data.dateexpiry = payload.dateexpiry;
   if (payload.debarred) data.debarred = payload.debarred;
   if (payload.role) data.role = payload.role;
+  if (payload.cardnumber) data.cardnumber = payload.cardnumber;
   if (payload.password) {
     data.password = await bcrypt.hash(payload.password, config.bcryptSaltRounds);
   }
@@ -121,6 +139,27 @@ export const updateBorrower = async (id, payload) => {
 };
 
 export const deleteBorrower = async (id) => {
+  const borrower = await prisma.borrower.findUnique({ where: { borrowernumber: id } });
+  if (!borrower) {
+    throw new ApiError(404, 'Borrower not found');
+  }
+
+  const activeIssue = await prisma.issue.findFirst({ where: { borrowernumber: id, returndate: null } });
+  if (activeIssue) {
+    throw new ApiError(409, 'Borrower has active checkouts');
+  }
+
+  const activeReserve = await prisma.reserve.findFirst({
+    where: {
+      borrowernumber: id,
+      cancellationdate: null,
+      found: null
+    }
+  });
+  if (activeReserve) {
+    throw new ApiError(409, 'Borrower has active holds');
+  }
+
   await prisma.borrower.delete({ where: { borrowernumber: id } });
   return true;
 };
